@@ -1,6 +1,6 @@
 # measurement/views.py
 from rest_framework import generics
-from .models import Sensor, Measurement
+from measurement.models import Sensor, Measurement 
 from .serializers import Sensor_Serializer, Measurement_Serializer, Sensor_Detail_Serializer
 
 # Создать и получить список датчиков
@@ -20,6 +20,9 @@ class MeasurementCreateView(generics.CreateAPIView):
     queryset = Measurement.objects.all()
     serializer_class = Measurement_Serializer
 
-    def perform_create(self, serializer):
-        sensor = Sensor.objects.get(id=self.request.data['sensor'])
+   def perform_create(self, serializer):
+        try:
+            sensor = Sensor.objects.get(id=self.request.data['sensor'])  # Проверка существования сенсора
+        except Sensor.DoesNotExist:
+            raise serializers.ValidationError("Sensor with this ID does not exist.")  # Ошибка, если сенсор не найден
         serializer.save(sensor=sensor)
